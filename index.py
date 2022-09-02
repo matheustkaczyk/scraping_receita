@@ -15,3 +15,7 @@ consulting_index = {
   'consulting_target_cnpj_input': '//*[@id="app"]/div[1]/article/div[2]/div[3]/div[1]/div[1]/input',
   'consulting_submit': '//*[@id="app"]/div[1]/article/footer/button[1]'
 }
+
+data_index = {
+  'data_table': '//*[@id="app"]/div[1]/div/div/div[2]/table/tbody/tr',
+}

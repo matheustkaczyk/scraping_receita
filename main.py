@@ -10,7 +10,8 @@ import time
 from index import (
   login_index,
   main_index,
-  consulting_index
+  consulting_index,
+  data_index
 )
 
 load_dotenv()
@@ -72,5 +73,16 @@ time.sleep(.5)
 
 consulting_submit.click()
 
+time.sleep(.5)
+
 driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+
+#Análise dos dados
+
+list_table_elements = driver.find_elements(By.XPATH, data_index['data_table'])
+
+for element in list_table_elements:
+  element_text = element.text + ' '
+  print(element_text.split(' '))
+
 time.sleep(30)
