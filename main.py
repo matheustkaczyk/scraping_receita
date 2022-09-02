@@ -23,6 +23,7 @@ URL='https://receita.pr.gov.br/login'
 CNPJ_target = input('CNPJ: ')
 
 driver = webdriver.Chrome(ChromeDriverManager().install())
+driver.maximize_window()
 driver.get(URL)
 
 # Login
