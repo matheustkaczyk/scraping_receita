@@ -11,5 +11,7 @@ main_index = {
 
 consulting_index = {
   'consulting_select': '//*[@id="app"]/div[1]/article/div[2]/div[1]/div[1]/div/select',
-  'consulting_filter_select': '//*[@id="app"]/div[1]/article/div[2]/div[2]/div[1]/div/select'
+  'consulting_filter_select': '//*[@id="app"]/div[1]/article/div[2]/div[2]/div[1]/div/select',
+  'consulting_target_cnpj_input': '//*[@id="app"]/div[1]/article/div[2]/div[3]/div[1]/div[1]/input',
+  'consulting_submit': '//*[@id="app"]/div[1]/article/footer/button[1]'
 }
