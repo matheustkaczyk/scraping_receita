@@ -1,11 +1,13 @@
-from cmd import PROMPT
 from selenium import webdriver
+from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.options import Options
 from dotenv import load_dotenv
 import os
 import time
+import datetime
 
 from index import (
   login_index,
@@ -21,9 +23,21 @@ PASSWORD = os.environ.get('PASSWORD')
 CNPJ = os.environ.get('CNPJ_OWN')
 URL='https://receita.pr.gov.br/login'
 
-CNPJ_target = input('CNPJ: ')
+final_data = []
 
-driver = webdriver.Chrome(ChromeDriverManager().install())
+CNPJ_target = input('CNPJ: ')
+DATE_target = input('Data (dd/mm/aa): ')
+
+options = Options()
+options.add_experimental_option("prefs", {
+  "download.default_directory": os.getcwd(),
+  "download.prompt_for_download": False,
+  "download.directory_upgrade": True,
+  "safebrowsing.enabled": True
+})
+
+driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options)
+
 driver.maximize_window()
 driver.get(URL)
 
@@ -80,9 +94,27 @@ driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 #Análise dos dados
 
 list_table_elements = driver.find_elements(By.XPATH, data_index['data_table'])
+date_target_split = DATE_target.split('/')
+date_target_parsed = datetime.date(int(date_target_split[2]), int(date_target_split[1]), int(date_target_split[0]))
 
+line_number = 1
+w_handles = driver.current_window_handle
 for element in list_table_elements:
   element_text = element.text + ' '
-  print(element_text.split(' '))
+  split_element = element_text.split(' ')
+  splitted_date = split_element[1].split('/')
+  element_date = datetime.date(year=int(splitted_date[2]), month=int(splitted_date[1]), day=int(splitted_date[0]))
+
+  if(element_date <= date_target_parsed):
+    xml_btn_path = f'//*[@id="app"]/div[1]/div/div/div[2]/table/tbody/tr[{line_number}]/td[10]/button'
+    
+    xml_btn = driver.find_element(By.XPATH, xml_btn_path)
+    xml_btn.click()
+
+    time.sleep(1)
+
+    line_number += 1
+  
+print(final_data)
 
 time.sleep(30)

@@ -18,4 +18,5 @@ consulting_index = {
 
 data_index = {
   'data_table': '//*[@id="app"]/div[1]/div/div/div[2]/table/tbody/tr',
+  'value_info': 'box'
 }
