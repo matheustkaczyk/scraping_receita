@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 import os
 import time
 import datetime
+import xmltodict
 
 from index import (
   login_index,
@@ -104,6 +105,7 @@ for element in list_table_elements:
   split_element = element_text.split(' ')
   splitted_date = split_element[1].split('/')
   element_date = datetime.date(year=int(splitted_date[2]), month=int(splitted_date[1]), day=int(splitted_date[0]))
+  before_folder = os.listdir(os.getcwd())
 
   if(element_date <= date_target_parsed):
     xml_btn_path = f'//*[@id="app"]/div[1]/div/div/div[2]/table/tbody/tr[{line_number}]/td[10]/button'
@@ -111,9 +113,31 @@ for element in list_table_elements:
     xml_btn = driver.find_element(By.XPATH, xml_btn_path)
     xml_btn.click()
 
-    time.sleep(1)
+    time.sleep(2.5)
+
+    after_folder = os.listdir(os.getcwd())
+    diff = set(after_folder) - set(before_folder)
+
+    with open('nfae.xml', 'rb') as xml_file:
+      xml_data = xmltodict.parse(xml_file.read())
+      total_value = xml_data['nfeProc']['NFe']['infNFe']['total']['ICMSTot']['vNF']
+
+    # xml_file = open('nfae.xml', 'rb')
+    # file = xmltodict.parse(xml_file)
+    # total_value =  file['nfeProc']['NFe']['infNFe']['total']['ICMSTot']['vNF']
+    
+    if(len(diff) == 1):
+      file_name = diff.pop()
+      os.remove(file_name)
+    else:
+      print('More than one file or no file downloaded')
 
     line_number += 1
+    final_data.append({
+      'date': split_element[1],
+      'cnpj': split_element[2],
+      'value': total_value
+    })
   
 print(final_data)
 
