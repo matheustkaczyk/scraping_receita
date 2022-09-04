@@ -93,13 +93,12 @@ time.sleep(.5)
 driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 
 #Análise dos dados
-
 list_table_elements = driver.find_elements(By.XPATH, data_index['data_table'])
 date_target_split = DATE_target.split('/')
 date_target_parsed = datetime.date(int(date_target_split[2]), int(date_target_split[1]), int(date_target_split[0]))
 
 line_number = 1
-w_handles = driver.current_window_handle
+
 for element in list_table_elements:
   element_text = element.text + ' '
   split_element = element_text.split(' ')
@@ -122,10 +121,6 @@ for element in list_table_elements:
       xml_data = xmltodict.parse(xml_file.read())
       total_value = xml_data['nfeProc']['NFe']['infNFe']['total']['ICMSTot']['vNF']
 
-    # xml_file = open('nfae.xml', 'rb')
-    # file = xmltodict.parse(xml_file)
-    # total_value =  file['nfeProc']['NFe']['infNFe']['total']['ICMSTot']['vNF']
-    
     if(len(diff) == 1):
       file_name = diff.pop()
       os.remove(file_name)
