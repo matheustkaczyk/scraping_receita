@@ -95,13 +95,13 @@ time.sleep(.5)
 
 driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 
-#Análise dos dados
+#Captura dos dados
 partial_data = []
-list_table_elements = driver.find_elements(By.XPATH, data_index['data_table'])
+# list_table_elements = driver.find_elements(By.XPATH, data_index['data_table'])
 
-line_number = 1
-page_number = 3 # Página 3 é a primeira página com dados
-page_list_xpath = f'//*[@id="app"]/div[1]/div/div/div[2]/table/tfoot/tr/td/div/nav/ul/li[{page_number}]'
+# line_number = 1
+# page_number = 3 # Página 3 é a primeira página com dados
+# page_list_xpath = f'//*[@id="app"]/div[1]/div/div/div[2]/table/tfoot/tr/td/div/nav/ul/li[{page_number}]'
 
 # for element in list_table_elements:
 #   element_text = element.text + ' '
@@ -165,7 +165,6 @@ for item in json_data['lista']:
       "total_value": parsed_json['total']['ICMSTotal']['vNF']
     })
 
-# print(json_data['lista'][0])
-print(final_data)
+driver.quit()
 
 time.sleep(30)
