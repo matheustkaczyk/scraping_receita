@@ -4,11 +4,13 @@ from selenium.webdriver.support.select import Select
 from selenium.webdriver.common.by import By
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.options import Options
+from seleniumwire import webdriver as webdriver_seleniumwire
 from dotenv import load_dotenv
 import os
 import time
 import datetime
 import xmltodict
+import json
 
 from index import (
   login_index,
@@ -37,7 +39,8 @@ options.add_experimental_option("prefs", {
   "safebrowsing.enabled": True
 })
 
-driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options)
+# driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options)
+driver = webdriver_seleniumwire.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options)
 
 driver.maximize_window()
 driver.get(URL)
@@ -98,42 +101,60 @@ date_target_split = DATE_target.split('/')
 date_target_parsed = datetime.date(int(date_target_split[2]), int(date_target_split[1]), int(date_target_split[0]))
 
 line_number = 1
+page_number = 3 # Página 3 é a primeira página com dados
+page_list_xpath = f'//*[@id="app"]/div[1]/div/div/div[2]/table/tfoot/tr/td/div/nav/ul/li[{page_number}]'
 
-for element in list_table_elements:
-  element_text = element.text + ' '
-  split_element = element_text.split(' ')
-  splitted_date = split_element[1].split('/')
-  element_date = datetime.date(year=int(splitted_date[2]), month=int(splitted_date[1]), day=int(splitted_date[0]))
-  before_folder = os.listdir(os.getcwd())
+# for element in list_table_elements:
+#   element_text = element.text + ' '
+#   split_element = element_text.split(' ')
+#   splitted_date = split_element[1].split('/')
+#   formatted_date = [int(splitted_date[2]), int(splitted_date[1]), int(splitted_date[0])]
+#   element_date = datetime.date(year=formatted_date[0], month=formatted_date[1], day=formatted_date[2])
+#   before_folder = os.listdir(os.getcwd())
 
-  if(element_date <= date_target_parsed):
-    xml_btn_path = f'//*[@id="app"]/div[1]/div/div/div[2]/table/tbody/tr[{line_number}]/td[10]/button'
+#   if(element_date <= date_target_parsed):
+#     xml_btn_path = f'//*[@id="app"]/div[1]/div/div/div[2]/table/tbody/tr[{line_number}]/td[10]/button'
     
-    xml_btn = driver.find_element(By.XPATH, xml_btn_path)
-    xml_btn.click()
+#     xml_btn = driver.find_element(By.XPATH, xml_btn_path)
+#     xml_btn.click()
 
-    time.sleep(2.5)
+#     time.sleep(2.5)
 
-    after_folder = os.listdir(os.getcwd())
-    diff = set(after_folder) - set(before_folder)
+#     after_folder = os.listdir(os.getcwd())
+#     diff = set(after_folder) - set(before_folder)
 
-    with open('nfae.xml', 'rb') as xml_file:
-      xml_data = xmltodict.parse(xml_file.read())
-      total_value = xml_data['nfeProc']['NFe']['infNFe']['total']['ICMSTot']['vNF']
+#     with open('nfae.xml', 'rb') as xml_file:
+#       xml_data = xmltodict.parse(xml_file.read())
+#       total_value = xml_data['nfeProc']['NFe']['infNFe']['total']['ICMSTot']['vNF']
 
-    if(len(diff) == 1):
-      file_name = diff.pop()
-      os.remove(file_name)
-    else:
-      print('More than one file or no file downloaded')
+#     if(len(diff) == 1):
+#       file_name = diff.pop()
+#       os.remove(file_name)
+#     else:
+#       print('More than one file or no file downloaded')
 
-    line_number += 1
-    final_data.append({
-      'date': split_element[1],
-      'cnpj': split_element[2],
-      'value': total_value
-    })
+#     line_number += 1
+
+#     final_data.append({
+#       'date': split_element[1],
+#       'code': split_element[2],
+#       'value': total_value
+#     })
   
-print(final_data)
+# print(final_data)
+
+for requests in driver.requests:
+  if (requests.url == 'https://nfae.fazenda.pr.gov.br/nfae/api/nfae?acao=LISTAR'):
+    final_data.append(requests.response.body)
+
+time.sleep(2)
+
+parsing = json.loads(final_data[0])
+final_json = json.dumps(parsing)
+
+
+json_data = json.loads(final_json)
+for item in json_data['lista']:
+  print(item)
 
 time.sleep(30)
