@@ -1,4 +1,3 @@
-from selenium import webdriver
 from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.common.by import By
@@ -9,7 +8,6 @@ from dotenv import load_dotenv
 import os
 import time
 import datetime
-import xmltodict
 import json
 
 from index import (
