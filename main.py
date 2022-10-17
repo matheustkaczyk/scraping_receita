@@ -1,3 +1,4 @@
+from functools import partial
 from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.common.by import By
@@ -5,6 +6,7 @@ from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.options import Options
 from seleniumwire import webdriver as webdriver_seleniumwire
 from dotenv import load_dotenv
+from datetime import datetime
 import os
 import time
 import datetime
@@ -27,7 +29,7 @@ URL='https://receita.pr.gov.br/login'
 final_data = []
 
 CNPJ_target = input('CNPJ: ')
-DATE_target = input('Data (dd/mm/aa): ')
+YEAR_target = input('Ano desejado: ')
 
 options = Options()
 options.add_experimental_option("prefs", {
@@ -94,9 +96,8 @@ time.sleep(.5)
 driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 
 #Análise dos dados
+partial_data = []
 list_table_elements = driver.find_elements(By.XPATH, data_index['data_table'])
-date_target_split = DATE_target.split('/')
-date_target_parsed = datetime.date(int(date_target_split[2]), int(date_target_split[1]), int(date_target_split[0]))
 
 line_number = 1
 page_number = 3 # Página 3 é a primeira página com dados
@@ -143,16 +144,28 @@ page_list_xpath = f'//*[@id="app"]/div[1]/div/div/div[2]/table/tfoot/tr/td/div/n
 
 for requests in driver.requests:
   if (requests.url == 'https://nfae.fazenda.pr.gov.br/nfae/api/nfae?acao=LISTAR'):
-    final_data.append(requests.response.body)
+    partial_data.append(requests.response.body)
 
 time.sleep(2)
 
-parsing = json.loads(final_data[0])
+parsing = json.loads(partial_data[0])
 final_json = json.dumps(parsing)
 
 
 json_data = json.loads(final_json)
+
 for item in json_data['lista']:
-  print(item)
+  parsed_json = json.loads(item['json'])
+  data = datetime.datetime.fromtimestamp(item['dtProcessamento']).strftime('%d/%m/%Y'),
+  parsed_year = str(datetime.datetime.fromtimestamp(item['dtProcessamento'])).split(' ')[0].split('-')[0]
+
+  if int(parsed_year) == int(YEAR_target):
+    final_data.append({
+      "data": data,
+      "total_value": parsed_json['total']['ICMSTotal']['vNF']
+    })
+
+# print(json_data['lista'][0])
+print(final_data)
 
 time.sleep(30)
