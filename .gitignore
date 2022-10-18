@@ -2,3 +2,4 @@
 readme.txt
 data.json
 *.xlsx
+__pycache__
