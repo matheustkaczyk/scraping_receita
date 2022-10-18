@@ -1,5 +1,3 @@
-from functools import partial
-from unicodedata import numeric
 from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.common.by import By
@@ -11,14 +9,12 @@ from datetime import datetime
 from pandas import DataFrame
 import os
 import time
-import datetime
 import json
 
 from index import (
     login_index,
     main_index,
     consulting_index,
-    data_index
 )
 
 load_dotenv()
@@ -41,7 +37,6 @@ options.add_experimental_option("prefs", {
     "safebrowsing.enabled": True
 })
 
-# driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options)
 driver = webdriver_seleniumwire.Chrome(service=ChromeService(
     ChromeDriverManager().install()), options=options)
 
@@ -80,7 +75,9 @@ consulting_submit = driver.find_element(
 
 consulting_select.click()
 consulting_select_opt = driver.find_element(
-    By.XPATH, '//*[@id="app"]/div[1]/article/div[2]/div[1]/div[1]/div/select/option[2]')
+    By.XPATH,
+    '//*[@id="app"]/div[1]/article/div[2]/div[1]/div[1]/div/select/option[2]'
+    )
 
 time.sleep(.5)
 
