@@ -115,14 +115,15 @@ final_json = json.dumps(parsing)
 
 json_data = json.loads(final_json)
 
+
 for item in json_data['lista']:
     parsed_json = json.loads(item['json'])
-    data = datetime.datetime.fromtimestamp(
+    data = datetime.fromtimestamp(
         item['dtProcessamento']).strftime('%d/%m/%Y'),
-    parsed_year = str(datetime.datetime.fromtimestamp(
+    parsed_year = str(datetime.fromtimestamp(
         item['dtProcessamento'])).split(' ')[0].split('-')[0]
 
-    if int(parsed_year) == int(YEAR_target):
+    if (int(parsed_year) == int(YEAR_target)) and item['indSituacao'] != '0':
         final_data.append({
             "data": data[0],
             "total_value": float(parsed_json['total']['ICMSTotal']['vNF'].replace(',', '.')),
