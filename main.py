@@ -7,7 +7,7 @@ from selenium.webdriver.chrome.options import Options
 from seleniumwire import webdriver as webdriver_seleniumwire
 from dotenv import load_dotenv
 from datetime import datetime
-from pandas import pd
+from pandas import DataFrame
 import os
 import time
 import datetime
@@ -124,7 +124,7 @@ for item in json_data['lista']:
 driver.quit()
 
 ## Resultado
-df = pd.DataFrame(final_data)
+df = DataFrame(final_data)
 df.to_excel('dados.xlsx', index=False)
 
 time.sleep(30)
