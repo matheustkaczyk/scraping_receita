@@ -1,4 +1,5 @@
 from functools import partial
+from unicodedata import numeric
 from selenium.webdriver.chrome.service import Service as ChromeService
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.common.by import By
@@ -14,18 +15,18 @@ import datetime
 import json
 
 from index import (
-  login_index,
-  main_index,
-  consulting_index,
-  data_index
+    login_index,
+    main_index,
+    consulting_index,
+    data_index
 )
 
 load_dotenv()
 
-CPF  = os.environ.get('CPF')
+CPF = os.environ.get('CPF')
 PASSWORD = os.environ.get('PASSWORD')
 CNPJ = os.environ.get('CNPJ_OWN')
-URL='https://receita.pr.gov.br/login'
+URL = 'https://receita.pr.gov.br/login'
 
 final_data = []
 
@@ -34,14 +35,15 @@ YEAR_target = input('Ano desejado: ')
 
 options = Options()
 options.add_experimental_option("prefs", {
-  "download.default_directory": os.getcwd(),
-  "download.prompt_for_download": False,
-  "download.directory_upgrade": True,
-  "safebrowsing.enabled": True
+    "download.default_directory": os.getcwd(),
+    "download.prompt_for_download": False,
+    "download.directory_upgrade": True,
+    "safebrowsing.enabled": True
 })
 
 # driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options)
-driver = webdriver_seleniumwire.Chrome(service=ChromeService(ChromeDriverManager().install()), options=options)
+driver = webdriver_seleniumwire.Chrome(service=ChromeService(
+    ChromeDriverManager().install()), options=options)
 
 driver.maximize_window()
 driver.get(URL)
@@ -69,23 +71,29 @@ main_consulting.click()
 time.sleep(1)
 
 # Tela de consulta
-consulting_select = driver.find_element(By.XPATH, consulting_index['consulting_select'])
-consulting_filter_select = driver.find_element(By.XPATH, consulting_index['consulting_filter_select'])
-consulting_submit = driver.find_element(By.XPATH, consulting_index['consulting_submit'])
+consulting_select = driver.find_element(
+    By.XPATH, consulting_index['consulting_select'])
+consulting_filter_select = driver.find_element(
+    By.XPATH, consulting_index['consulting_filter_select'])
+consulting_submit = driver.find_element(
+    By.XPATH, consulting_index['consulting_submit'])
 
 consulting_select.click()
-consulting_select_opt = driver.find_element(By.XPATH, '//*[@id="app"]/div[1]/article/div[2]/div[1]/div[1]/div/select/option[2]')
+consulting_select_opt = driver.find_element(
+    By.XPATH, '//*[@id="app"]/div[1]/article/div[2]/div[1]/div[1]/div/select/option[2]')
 
 time.sleep(.5)
 
 consulting_select_opt.click()
 
-consulting_filter_select = Select(driver.find_element(By.XPATH, consulting_index['consulting_filter_select']))
+consulting_filter_select = Select(driver.find_element(
+    By.XPATH, consulting_index['consulting_filter_select']))
 consulting_filter_select.select_by_visible_text('Destinatário')
 
 time.sleep(.5)
 
-consulting_target_cnpj_input = driver.find_element(By.XPATH, consulting_index['consulting_target_cnpj_input'])
+consulting_target_cnpj_input = driver.find_element(
+    By.XPATH, consulting_index['consulting_target_cnpj_input'])
 consulting_target_cnpj_input.send_keys(CNPJ_target)
 
 time.sleep(.5)
@@ -96,12 +104,12 @@ time.sleep(.5)
 
 driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
 
-#Captura dos dados
+# Captura dos dados
 partial_data = []
 
 for requests in driver.requests:
-  if (requests.url == 'https://nfae.fazenda.pr.gov.br/nfae/api/nfae?acao=LISTAR'):
-    partial_data.append(requests.response.body)
+    if (requests.url == 'https://nfae.fazenda.pr.gov.br/nfae/api/nfae?acao=LISTAR'):
+        partial_data.append(requests.response.body)
 
 time.sleep(2)
 
@@ -111,20 +119,22 @@ final_json = json.dumps(parsing)
 json_data = json.loads(final_json)
 
 for item in json_data['lista']:
-  parsed_json = json.loads(item['json'])
-  data = datetime.datetime.fromtimestamp(item['dtProcessamento']).strftime('%d/%m/%Y'),
-  parsed_year = str(datetime.datetime.fromtimestamp(item['dtProcessamento'])).split(' ')[0].split('-')[0]
+    parsed_json = json.loads(item['json'])
+    data = datetime.datetime.fromtimestamp(
+        item['dtProcessamento']).strftime('%d/%m/%Y'),
+    parsed_year = str(datetime.datetime.fromtimestamp(
+        item['dtProcessamento'])).split(' ')[0].split('-')[0]
 
-  if int(parsed_year) == int(YEAR_target):
-    final_data.append({
-      "data": data,
-      "total_value": parsed_json['total']['ICMSTotal']['vNF']
-    })
+    if int(parsed_year) == int(YEAR_target):
+        final_data.append({
+            "data": data[0],
+            "total_value": float(parsed_json['total']['ICMSTotal']['vNF'].replace(',', '.')),
+        })
 
 driver.quit()
 
-## Resultado
+# Resultado
 df = DataFrame(final_data)
 df.to_excel('dados.xlsx', index=False)
 
-time.sleep(30)
+print('Finalizado com sucesso!')
